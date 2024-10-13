@@ -1,11 +1,14 @@
 package principal;
 
+import java.util.LinkedList;
+
 public class Empleado {
 
-	String nombre;
-	String apellido;
-	String codigo;
-	String correoElectronico;
+	private String nombre;
+	private String apellido;
+	private String codigo;
+	private String correoElectronico;
+	private LinkedList<String> tareas = new LinkedList<>();
   
   public Empleado(String nombre, String apellido, String codigo) {
 	  this.nombre = nombre;
