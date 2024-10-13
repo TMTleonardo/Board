@@ -29,6 +29,6 @@ public class Tarea {
   }
   public void modificarTarea(String nuevaDescripcion){
     this.descripcion= nuevaDescripcion;
-    System.out.println("Tarea'"+ nombreTarea +"'modificada.")
+    System.out.println("Tarea'"+ nombreTarea +"'modificada.");
   }
 }
