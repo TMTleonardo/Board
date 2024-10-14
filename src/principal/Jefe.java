@@ -11,20 +11,4 @@ public class Jefe extends Empleado {
 
 	}
 
-	public void agregarEvento() {
-
-	}
-	
-	public void agregarTarea() {
-		
-	}
-
-	public void agregarEmpleado() {
-
-	}
-
-	public void asignarTareaEmpleado() {
-
-	}
-
 }
