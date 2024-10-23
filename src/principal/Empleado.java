@@ -1,7 +1,5 @@
 package principal;
 
-import java.util.LinkedList;
-
 public class Empleado {
 
 	private String nombre;

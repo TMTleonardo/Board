@@ -1,8 +1,11 @@
-package principal;
+package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+
+import principal.Empleado;
+import principal.Jefe;
 
 class JefeTest {
 
