@@ -3,12 +3,12 @@ package principal;
 import java.awt.Color;
 import java.awt.Dimension;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 
 public class Window extends JFrame {
-	
-static final int SCREEN_WIDTH = 1100;
+
+	//Dimensiones de la ventana
+static final int SCREEN_WIDTH = 1200;
 static final int SCREEN_HEIGHT = 650;
 static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -18,10 +18,10 @@ static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 	
 	public void init() {
-		
+		//Configuraciones de la ventana
 		this.setPreferredSize(SCREEN_SIZE);
-		this.setTitle("Dash Board");
-		this.setResizable(false);
+		this.setTitle("Board");
+		this.setResizable(true);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		iniciarComponentes();
 		this.pack();
@@ -29,18 +29,17 @@ static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
 		this.setLocationRelativeTo(null);
 	}
 	private void iniciarComponentes() {
+		//Crea el panel principal y el panel de menu y el board
 		Panel mainPanel = new Panel();
 		Menu menu = new Menu();
 		Board board = new Board();
 		
-		
+		//Configuraciones del panel principal
 		mainPanel.setBackground(new Color(62,62,66));
 		mainPanel.setLayout(null);
-		mainPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
-	    mainPanel.setPreferredSize(new Dimension(350, 190));
-	    
 		this.getContentPane().add(mainPanel);
 		
+		//Agrega paneles secundarios al principal
 		mainPanel.add(menu);
 		mainPanel.add(board);
 		
