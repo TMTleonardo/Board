@@ -1,4 +1,4 @@
-package principal;
+package interfaz;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLayeredPane;

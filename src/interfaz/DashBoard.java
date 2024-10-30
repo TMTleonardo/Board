@@ -1,4 +1,4 @@
-package principal;
+package interfaz;
 
 public class DashBoard {
 	
