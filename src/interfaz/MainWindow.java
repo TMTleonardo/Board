@@ -1,6 +1,5 @@
 package interfaz;
 
-import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JFrame;
@@ -15,9 +14,7 @@ static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
 	
 	public MainWindow(){
 		MainPanel mainPanel = new MainPanel();
-		
-		this.getContentPane().add(mainPanel);
-		iniciarComponentes();
+		add(mainPanel);
 		this.setPreferredSize(SCREEN_SIZE);
 		this.setTitle("Board");
 		this.setResizable(true);
@@ -27,10 +24,4 @@ static final Dimension SCREEN_SIZE = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
 		this.setLocationRelativeTo(null);
 	}
 	
-	
-	private void iniciarComponentes() {
-		
-		
-		
-	}
 }

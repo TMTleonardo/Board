@@ -8,7 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLayeredPane;
 import javax.swing.border.TitledBorder;
 
-public class Columna extends JLayeredPane {
+public class Columna extends JLayeredPane{
 
 	private LinkedList<Tarjeta> listaTarjetas = new LinkedList<>();
 	private String tituloColumna = "Columna";
@@ -24,8 +24,10 @@ public class Columna extends JLayeredPane {
 		System.out.println("Ingrese el nombre de la tarjeta");
 		String nombreTarjeta = scan.nextLine();
 		Tarjeta t = new Tarjeta(nombreTarjeta);
-		//listaTarjetas.add(t);
+		listaTarjetas.add(t);
 		add(t);
 		//scan.close();
 	}
+	
+	
 }

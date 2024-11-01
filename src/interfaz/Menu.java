@@ -44,6 +44,7 @@ public class Menu extends JPanel {
 	ActionListener agregar = new ActionListener() {
 		public void actionPerformed(ActionEvent ae) {
 			Board.c1.agregarTarjeta();
+			//new VentanaEdicion();
 		}
 	};
 		b1.addActionListener(agregar);
