@@ -11,49 +11,44 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class Tarea {
+public class Evento {
 
-    private static JTable tareasTable;
+    private static JTable eventosTable;
     private static DefaultTableModel tableModel;
 
-    public static JPanel gestionarTareasPanel() {
+    public static JPanel gestionarEventosPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Gestión de Tareas"), BorderLayout.NORTH);
-        tableModel = new DefaultTableModel(new String[]{"ID", "Nombre", "Descripción", "Fecha Inicio", "Hora Inicio", "Fecha Fin", "Hora Fin", "Encargado"}, 0);
-        tareasTable = new JTable(tableModel);
-        actualizarTablaTareas();
-        panel.add(new JScrollPane(tareasTable), BorderLayout.CENTER);
+        panel.add(new JLabel("Gestión de Eventos"), BorderLayout.NORTH);
+        tableModel = new DefaultTableModel(new String[]{"ID", "Nombre", "Descripción", "Fecha Inicio", "Hora Inicio", "Fecha Fin", "Hora Fin"}, 0);
+        eventosTable = new JTable(tableModel);
+        actualizarTablaEventos();
+        panel.add(new JScrollPane(eventosTable), BorderLayout.CENTER);
         JPanel botonesPanel = new JPanel(new GridLayout(1, 3));
-        JButton btnAddTask = new JButton("Agregar Tarea");
-        btnAddTask.addActionListener(e -> agregarTarea());
-        JButton btnEditTask = new JButton("Modificar Tarea");
-        btnEditTask.addActionListener(e -> modificarTarea());
-        JButton btnDeleteTask = new JButton("Eliminar Tarea");
-        btnDeleteTask.addActionListener(e -> eliminarTarea());
-
-        botonesPanel.add(btnAddTask);
-        botonesPanel.add(btnEditTask);
-        botonesPanel.add(btnDeleteTask);
+        JButton btnAddEvent = new JButton("Agregar Evento");
+        btnAddEvent.addActionListener(e -> agregarEvento());
+        JButton btnEditEvent = new JButton("Modificar Evento");
+        btnEditEvent.addActionListener(e -> modificarEvento());
+        JButton btnDeleteEvent = new JButton("Eliminar Evento");
+        btnDeleteEvent.addActionListener(e -> eliminarEvento());
+        botonesPanel.add(btnAddEvent);
+        botonesPanel.add(btnEditEvent);
+        botonesPanel.add(btnDeleteEvent);
         panel.add(botonesPanel, BorderLayout.SOUTH);
-
         return panel;
     }
 
-    public static void actualizarTablaTareas() {
+    public static void actualizarTablaEventos() {
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                "SELECT T.idTarea, T.nombreTarea, T.descripcion, T.fechaInicio, T.fechaFin, E.nombre AS encargado " +
-                "FROM Tarea T LEFT JOIN Empleado E ON T.encargado = E.idEmpleado")) {
+             ResultSet rs = stmt.executeQuery("SELECT * FROM Evento")) {
             tableModel.setRowCount(0);
             while (rs.next()) {
                 tableModel.addRow(new Object[]{
-                        rs.getString("idTarea"),
-                        rs.getString("nombreTarea"),
+                        rs.getString("idEvento"),
+                        rs.getString("nombreEvento"),
                         rs.getString("descripcion"),
                         rs.getTimestamp("fechaInicio"),
-                        rs.getTimestamp("fechaFin"),
-                        rs.getString("encargado")
+                        rs.getTimestamp("fechaFin")
                 });
             }
         } catch (SQLException e) {
@@ -61,43 +56,37 @@ public class Tarea {
         }
     }
 
-    public static void agregarTarea() {
+    public static void agregarEvento() {
         JTextField nombreField = new JTextField();
         JTextField descripcionField = new JTextField();
         JDateChooser fechaInicioChooser = new JDateChooser();
         JSpinner horaInicioSpinner = crearSpinnerHora();
         JDateChooser fechaFinChooser = new JDateChooser();
         JSpinner horaFinSpinner = crearSpinnerHora();
-
-        JComboBox<String> encargadoBox = new JComboBox<>();
-        cargarEncargados(encargadoBox);
-
         Object[] message = {
-                "Nombre de Tarea:", nombreField,
+                "Nombre del Evento:", nombreField,
                 "Descripción:", descripcionField,
                 "Fecha de Inicio:", fechaInicioChooser,
                 "Hora de Inicio:", horaInicioSpinner,
                 "Fecha de Fin:", fechaFinChooser,
-                "Hora de Fin:", horaFinSpinner,
-                "Encargado:", encargadoBox
+                "Hora de Fin:", horaFinSpinner
         };
 
-        int option = JOptionPane.showConfirmDialog(null, message, "Agregar Tarea", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, message, "Agregar Evento", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             Date fechaInicio = combinarFechaHora(fechaInicioChooser.getDate(), (Date) horaInicioSpinner.getValue());
             Date fechaFin = combinarFechaHora(fechaFinChooser.getDate(), (Date) horaFinSpinner.getValue());
             if (fechaInicio != null && fechaFin != null) {
                 try (Connection conn = DatabaseConnection.getConnection()) {
-                    String sql = "INSERT INTO Tarea (idTarea, nombreTarea, descripcion, fechaInicio, fechaFin, encargado) VALUES (UUID(), ?, ?, ?, ?, ?)";
+                    String sql = "INSERT INTO Evento (idEvento, nombreEvento, descripcion, fechaInicio, fechaFin) VALUES (UUID(), ?, ?, ?, ?)";
                     PreparedStatement pstmt = conn.prepareStatement(sql);
                     pstmt.setString(1, nombreField.getText());
                     pstmt.setString(2, descripcionField.getText());
                     pstmt.setTimestamp(3, new Timestamp(fechaInicio.getTime()));
                     pstmt.setTimestamp(4, new Timestamp(fechaFin.getTime()));
-                    pstmt.setInt(5, encargadoBox.getSelectedIndex() + 1);
                     pstmt.executeUpdate();
-                    JOptionPane.showMessageDialog(null, "Tarea agregada exitosamente.");
-                    actualizarTablaTareas();
+                    JOptionPane.showMessageDialog(null, "Evento agregado exitosamente.");
+                    actualizarTablaEventos();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -125,121 +114,103 @@ public class Tarea {
         return fechaCal.getTime();
     }
 
-    public static void modificarTarea() {
-        JComboBox<String> tareaBox = new JComboBox<>();
-        List<String> tareaIds = cargarTareasExistentes(tareaBox);
+    public static void modificarEvento() {
+        JComboBox<String> eventoBox = new JComboBox<>();
+        List<String> eventoIds = cargarEventosExistentes(eventoBox);
 
-        int option = JOptionPane.showConfirmDialog(null, tareaBox, "Selecciona una Tarea para Modificar", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, eventoBox, "Selecciona un Evento para Modificar", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            String selectedId = tareaIds.get(tareaBox.getSelectedIndex());
-            cargarDatosTarea(selectedId);
+            String selectedId = eventoIds.get(eventoBox.getSelectedIndex());
+            cargarDatosEvento(selectedId);
         }
     }
 
-    private static void cargarDatosTarea(String tareaId) {
+    private static void cargarDatosEvento(String eventoId) {
         JTextField nombreField = new JTextField();
         JTextField descripcionField = new JTextField();
-        JComboBox<String> encargadoBox = new JComboBox<>();
         JDateChooser fechaInicioChooser = new JDateChooser();
         JSpinner horaInicioSpinner = crearSpinnerHora();
         JDateChooser fechaFinChooser = new JDateChooser();
         JSpinner horaFinSpinner = crearSpinnerHora();
 
-        cargarEncargados(encargadoBox);
-
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Tarea WHERE idTarea = ?")) {
-            pstmt.setString(1, tareaId);
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Evento WHERE idEvento = ?")) {
+            pstmt.setString(1, eventoId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                nombreField.setText(rs.getString("nombreTarea"));
+                nombreField.setText(rs.getString("nombreEvento"));
                 descripcionField.setText(rs.getString("descripcion"));
                 fechaInicioChooser.setDate(rs.getTimestamp("fechaInicio"));
                 horaInicioSpinner.setValue(rs.getTimestamp("fechaInicio"));
                 fechaFinChooser.setDate(rs.getTimestamp("fechaFin"));
                 horaFinSpinner.setValue(rs.getTimestamp("fechaFin"));
-                encargadoBox.setSelectedIndex(rs.getInt("encargado") - 1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         Object[] message = {
-                "Nombre de Tarea:", nombreField,
+                "Nombre del Evento:", nombreField,
                 "Descripción:", descripcionField,
-                "Encargado:", encargadoBox,
                 "Fecha de Inicio:", fechaInicioChooser,
                 "Hora de Inicio:", horaInicioSpinner,
                 "Fecha de Fin:", fechaFinChooser,
                 "Hora de Fin:", horaFinSpinner
         };
 
-        int option = JOptionPane.showConfirmDialog(null, message, "Modificar Tarea", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, message, "Modificar Evento", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             Date fechaInicio = combinarFechaHora(fechaInicioChooser.getDate(), (Date) horaInicioSpinner.getValue());
             Date fechaFin = combinarFechaHora(fechaFinChooser.getDate(), (Date) horaFinSpinner.getValue());
             try (Connection conn = DatabaseConnection.getConnection()) {
-                String sql = "UPDATE Tarea SET nombreTarea = ?, descripcion = ?, fechaInicio = ?, fechaFin = ?, encargado = ? WHERE idTarea = ?";
+                String sql = "UPDATE Evento SET nombreEvento = ?, descripcion = ?, fechaInicio = ?, fechaFin = ? WHERE idEvento = ?";
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 pstmt.setString(1, nombreField.getText());
                 pstmt.setString(2, descripcionField.getText());
                 pstmt.setTimestamp(3, new Timestamp(fechaInicio.getTime()));
                 pstmt.setTimestamp(4, new Timestamp(fechaFin.getTime()));
-                pstmt.setInt(5, encargadoBox.getSelectedIndex() + 1);
-                pstmt.setString(6, tareaId);
+                pstmt.setString(5, eventoId);
                 pstmt.executeUpdate();
-                JOptionPane.showMessageDialog(null, "Tarea modificada exitosamente.");
-                actualizarTablaTareas();
+                JOptionPane.showMessageDialog(null, "Evento modificado exitosamente.");
+                actualizarTablaEventos();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static void eliminarTarea() {
-        JComboBox<String> tareaBox = new JComboBox<>();
-        List<String> tareaIds = cargarTareasExistentes(tareaBox);
+    public static void eliminarEvento() {
+        JComboBox<String> eventoBox = new JComboBox<>();
+        List<String> eventoIds = cargarEventosExistentes(eventoBox);
 
-        int option = JOptionPane.showConfirmDialog(null, tareaBox, "Selecciona una Tarea para Eliminar", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, eventoBox, "Selecciona un Evento para Eliminar", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            String selectedId = tareaIds.get(tareaBox.getSelectedIndex());
+            String selectedId = eventoIds.get(eventoBox.getSelectedIndex());
             try (Connection conn = DatabaseConnection.getConnection()) {
-                String sql = "DELETE FROM Tarea WHERE idTarea = ?";
+                String sql = "DELETE FROM Evento WHERE idEvento = ?";
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 pstmt.setString(1, selectedId);
                 pstmt.executeUpdate();
-                JOptionPane.showMessageDialog(null, "Tarea eliminada exitosamente.");
-                actualizarTablaTareas();
+                JOptionPane.showMessageDialog(null, "Evento eliminado exitosamente.");
+                actualizarTablaEventos();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private static void cargarEncargados(JComboBox<String> encargadoBox) {
+    private static List<String> cargarEventosExistentes(JComboBox<String> eventoBox) {
+        List<String> eventoIds = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT nombre FROM Empleado")) {
+             ResultSet rs = stmt.executeQuery("SELECT idEvento, nombreEvento FROM Evento")) {
             while (rs.next()) {
-                encargadoBox.addItem(rs.getString("nombre"));
+                eventoBox.addItem(rs.getString("nombreEvento"));
+                eventoIds.add(rs.getString("idEvento"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private static List<String> cargarTareasExistentes(JComboBox<String> tareaBox) {
-        List<String> tareaIds = new ArrayList<>();
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT idTarea, nombreTarea FROM Tarea")) {
-            while (rs.next()) {
-                tareaBox.addItem(rs.getString("nombreTarea"));
-                tareaIds.add(rs.getString("idTarea"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return tareaIds;
+        return eventoIds;
     }
 }
